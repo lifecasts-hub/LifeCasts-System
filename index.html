@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <base href="https://lifecasts-hub.github.io/">
-<script>/*LC-OTA*/(function(){var B="1.1";window.LC_BUILT=B;
+<script>/*LC-OTA*/(function(){var B="1.2";window.LC_BUILT=B;
 function c(a,b){a=String(a).split(".");b=String(b).split(".");for(var i=0;i<Math.max(a.length,b.length);i++){var d=(+a[i]||0)-(+b[i]||0);if(d)return d>0?1:-1}return 0}window.LC_CMP=c;
 if(window.LC_OTA_VER){window.LC_VER=window.LC_OTA_VER;return}window.LC_VER=B;
 if(location.protocol!=="file:")return;
@@ -167,11 +167,18 @@ a{color:var(--accent)}
 textarea.qn{flex:1;min-height:110px;border:0;resize:none;background:transparent;font:inherit;color:inherit;outline:none}
 
 /* Dock */
-#dock{position:fixed;left:50%;bottom:calc(10px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:20;display:flex;gap:10px;padding:8px 10px;border-radius:22px;box-shadow:0 10px 40px rgba(0,0,0,.25);max-width:calc(100vw - 20px);overflow-x:auto;scrollbar-width:none}
-#dock .ic i{width:50px;height:50px;border-radius:12px;font-size:24px}
+#dock{--h:64px;--p:8px;--ic:calc(var(--h) - 2*var(--p));--g:4px;--sep:12px;position:fixed;left:50%;bottom:calc(10px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:20;display:flex;align-items:center;gap:var(--sep)}
+#dock .dkbar,#dock .dkset{box-sizing:border-box;height:var(--h);border-radius:calc(var(--h)/2);background:rgba(28,28,30,.88);-webkit-backdrop-filter:blur(30px) saturate(1.6);backdrop-filter:blur(30px) saturate(1.6);border:1px solid rgba(255,255,255,.1);box-shadow:0 8px 28px rgba(0,0,0,.28)}
+#dock .dkbar{padding:var(--p);width:calc(var(--n,5)*var(--ic) + (var(--n,5) - 1)*var(--g) + 2*var(--p) + 2px);overflow:hidden;display:flex}
+#dock .dkset{width:var(--h);display:grid;place-items:center;flex:none}
+#dock .dks{flex:1;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+#dock .dks::-webkit-scrollbar{display:none}
+#dock .dkp{flex:0 0 100%;display:flex;gap:var(--g);align-items:center;scroll-snap-align:start;scroll-snap-stop:always}
+#dock .ic{position:relative;flex:none}
+#dock .ic i{width:var(--ic);height:var(--ic);border-radius:50%;font-size:calc(var(--ic)*.48);box-shadow:none}
 #dock .ic span{display:none}
-#dock .ic{position:relative}
-#dock .ic.run::after{content:"";position:absolute;bottom:-5px;width:4px;height:4px;border-radius:50%;background:var(--ink)}
+#dock .dkset .ic i{background:transparent;color:#fff}
+#dock .ic.run::after{content:"";position:absolute;left:50%;bottom:-3px;margin-left:-2px;width:4px;height:4px;border-radius:50%;background:#fff}
 
 /* Fenêtres */
 .win{position:fixed;z-index:25;background:var(--win);border-radius:14px;box-shadow:0 30px 90px rgba(0,0,0,.4);display:flex;flex-direction:column;overflow:hidden;animation:pop .22s ease-out;top:60px;left:50%;width:min(1000px,94vw);height:calc(100vh - 170px);height:calc(100dvh - 170px);transform:translateX(-50%)}
@@ -210,8 +217,7 @@ textarea.qn{flex:1;min-height:110px;border:0;resize:none;background:transparent;
  #desk{padding:20px 12px 110px}
  .tile{padding:16px;min-height:0}
  .clock{font-size:44px}
- #dock{gap:6px;padding:6px 8px;border-radius:18px}
- #dock .ic i{width:42px;height:42px;border-radius:10px;font-size:20px}
+ #dock{--h:56px;--p:6px}
  #bar{gap:6px;padding-left:8px;padding-right:8px}
  #barClock{font-size:12px}
  .win .body{padding:16px}
@@ -265,7 +271,7 @@ textarea.qn{flex:1;min-height:110px;border:0;resize:none;background:transparent;
 <section class="tile glass"><h2>Note rapide</h2><textarea class="qn" id="qn" placeholder="Écrivez une note… elle reste sur cet appareil."></textarea></section>
 </div>
 </main>
-<div id="dock" class="glass"></div>
+<div id="dock"></div>
 </div>
 
 <script>
@@ -314,7 +320,10 @@ function boot(){
 
 /* Icônes : grille + dock */
 function icon(a,label){const b=E("button",{className:"ic",title:a.nom});b.dataset.app=a.id;b.innerHTML="<i>"+a.icon+"</i>"+(label?"<span>"+a.nom+"</span>":"");b.onclick=()=>open(a.id);return b}
-APPS.forEach(a=>{q("gridApps").append(icon(a,true));if(a.id!=="about")q("dock").append(icon(a,false))});
+APPS.forEach(a=>q("gridApps").append(icon(a,true)));
+/* Dock : barre ronde, apps en pages (snap scroll comme la barre de Notes) */
+function dockBuild(){const d=q("dock"),m=innerWidth<=700,h=m?56:64,p=m?6:8,ic=h-2*p,per=Math.max(3,Math.min(7,Math.floor((innerWidth-24-12-h-2*p+4)/(ic+4)))),key=per+"|"+m;if(d.dataset.per==key)return;d.dataset.per=key;d.innerHTML="";const L=APPS.filter(a=>a.id!=="about"&&a.id!=="settings"),bar=E("div",{className:"dkbar"}),s=E("div",{className:"dks"});bar.style.setProperty("--n",Math.min(per,L.length));for(let i=0;i<L.length;i+=per){const pg=E("div",{className:"dkp"});L.slice(i,i+per).forEach(a=>pg.append(icon(a,false)));s.append(pg)}bar.append(s);const set=E("div",{className:"dkset"});set.append(icon(APPS.find(a=>a.id==="settings"),false));d.append(bar,set);dockState()}
+addEventListener("resize",dockBuild);
 document.addEventListener("click",e=>{const o=e.target.closest("[data-open]");if(o)open(o.dataset.open)});
 
 /* Fenêtres */
@@ -339,6 +348,7 @@ function close(id){wins[id].remove();delete wins[id];dockState();title()}
 function closeAll(){Object.keys(wins).forEach(close)}
 function title(){const vis=Object.entries(wins).filter(([,w])=>!w.hidden).sort((a,b)=>b[1].style.zIndex-a[1].style.zIndex)[0];q("appTitle").textContent=vis?APPS.find(a=>a.id===vis[0]).nom:"LifeCasts System"}
 function dockState(){document.querySelectorAll("#dock .ic").forEach(b=>b.classList.toggle("run",!!wins[b.dataset.app]))}
+dockBuild();
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){const t=Object.entries(wins).filter(([,w])=>!w.hidden).sort((a,b)=>b[1].style.zIndex-a[1].style.zIndex)[0];if(t)close(t[0])}});
 
 /* Menu */
