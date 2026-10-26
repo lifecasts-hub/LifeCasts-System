@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <base href="https://lifecasts-hub.github.io/">
-<script>/*LC-OTA*/(function(){var B="1.0";window.LC_BUILT=B;
+<script>/*LC-OTA*/(function(){var B="1.1";window.LC_BUILT=B;
 function c(a,b){a=String(a).split(".");b=String(b).split(".");for(var i=0;i<Math.max(a.length,b.length);i++){var d=(+a[i]||0)-(+b[i]||0);if(d)return d>0?1:-1}return 0}window.LC_CMP=c;
 if(window.LC_OTA_VER){window.LC_VER=window.LC_OTA_VER;return}window.LC_VER=B;
 if(location.protocol!=="file:")return;
@@ -19,7 +19,7 @@ g.onsuccess=function(){var h=g.result;if(!h||h.indexOf("/*LC-OTA*/")<0)return fa
 })()</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#2a1c14">
-<link rel="icon" type="image/png" href="favicon.png">
+<link rel="icon" type="image/png" href="system-favicon.png?v=1"><link rel="apple-touch-icon" href="system-apple-icon.png?v=1"><meta name="apple-mobile-web-app-title" content="LifeCasts System">
 <title>LifeCasts System</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
 <script>/* LifeCasts — outils communs aux pages Applications / Admin */
@@ -79,14 +79,15 @@ disk:'<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.7 4 3 9 3s9-1.
 return function(n,s){return '<svg class="ico" viewBox="0 0 24 24" width="'+(s||'1em')+'" height="'+(s||'1em')+'" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+P[n]+'</svg>'}})();
 
 /* Téléchargements : fichiers .apk / .dmg joints à la dernière Release GitHub */
+function LCBASE(repo){const r=repo.split("/")[1];return "https://lifecasts-hub.github.io/"+(/\.github\.io$/.test(r)?"":r+"/")}
 async function ghDownloads0(repo){
   try{const r=await fetch("https://api.github.com/repos/"+repo+"/contents/downloads");if(r.ok){const best={};
     for(const x of await r.json()){const n=x.name.toLowerCase(),t=n.endsWith(".apk")?"Android (APK)":n.endsWith(".dmg")?"Mac (DMG)":/\.(exe|msi)$/.test(n)?"Windows (EXE)":null;if(!t)continue;
-      const v=(x.name.match(/(\d+(?:\.\d+)+)/)||[])[1]||"0";if(!best[t]||vcmp(v,best[t].tag)>0)best[t]={label:t,url:"https://lifecasts-hub.github.io/"+repo.split("/")[1]+"/downloads/"+encodeURIComponent(x.name),size:x.size,tag:v}}
+      const v=(x.name.match(/(\d+(?:\.\d+)+)/)||[])[1]||"0";if(!best[t]||vcmp(v,best[t].tag)>0)best[t]={label:t,url:LCBASE(repo)+"downloads/"+encodeURIComponent(x.name),size:x.size,tag:v}}
     const out=Object.values(best);if(out.length)return out}}catch(e){}
   try{const r=await fetch("https://data.jsdelivr.com/v1/packages/gh/"+repo+"@main?structure=flat");if(r.ok){const best={};
     for(const f of (await r.json()).files||[]){const m=f.name.match(/^\/downloads\/([^/]+)$/);if(!m)continue;const n=m[1].toLowerCase(),t=n.endsWith(".apk")?"Android (APK)":n.endsWith(".dmg")?"Mac (DMG)":/\.(exe|msi)$/.test(n)?"Windows (EXE)":null;if(!t)continue;
-      const v=(m[1].match(/(\d+(?:\.\d+)+)/)||[])[1]||"0";if(!best[t]||vcmp(v,best[t].tag)>0)best[t]={label:t,url:"https://lifecasts-hub.github.io/"+repo.split("/")[1]+"/downloads/"+encodeURIComponent(m[1]),size:f.size,tag:v}}
+      const v=(m[1].match(/(\d+(?:\.\d+)+)/)||[])[1]||"0";if(!best[t]||vcmp(v,best[t].tag)>0)best[t]={label:t,url:LCBASE(repo)+"downloads/"+encodeURIComponent(m[1]),size:f.size,tag:v}}
     const out=Object.values(best);if(out.length)return out}}catch(e){}
   const r=await fetch("https://api.github.com/repos/"+repo+"/releases/latest");if(!r.ok)return [];const j=await r.json();
   return (j.assets||[]).map(x=>{const n=x.name.toLowerCase();const t=n.endsWith(".apk")?"Android (APK)":n.endsWith(".dmg")?"Mac (DMG)":/\.(exe|msi)$/.test(n)?"Windows (EXE)":null;return t&&{label:t,url:x.browser_download_url,size:x.size,tag:j.tag_name}}).filter(Boolean)}
@@ -97,7 +98,7 @@ async function ghCached(k,fn,fb){let c;try{c=JSON.parse(localStorage.getItem("lc
   try{const v=await fn();if(Array.isArray(v)&&!v.length&&c)return c.v;try{if(!(Array.isArray(v)&&!v.length))localStorage.setItem("lcgh:"+k,JSON.stringify({t:Date.now(),v}))}catch(e){}return v}
   catch(e){if(c)return c.v;if(fb)return fb();throw e}}
 function ghVersions(repo){return ghCached("v:"+repo,()=>ghVersions0(repo),async()=>{const v=await liveVersion(repo);return v?[{version:v,date:null,notes:""}]:[]})}
-function ghDownloads(repo){return ghCached("d2:"+repo,()=>ghDownloads0(repo),()=>[])}
+function ghDownloads(repo){return ghCached("d3:"+repo,()=>ghDownloads0(repo),()=>[])}
 </script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
@@ -117,7 +118,7 @@ a{color:var(--accent)}
 #login{position:fixed;inset:0;display:grid;place-items:center;padding:16px;z-index:5}
 #login .box{width:min(400px,100%);border-radius:28px;padding:36px 28px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;box-shadow:0 30px 80px rgba(0,0,0,.3)}
 .mark{position:relative;overflow:hidden;width:84px;height:84px;border-radius:22px;background:linear-gradient(135deg,#2a1c14,#9a5b1e);display:grid;place-items:center;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-.mark img{position:absolute;inset:0;margin:auto;height:60%;width:auto;filter:invert(1)}
+.mark img{position:absolute;inset:0;width:100%;height:100%}
 #login h1{margin:4px 0 0;font-size:26px;letter-spacing:-.03em}
 #login p{margin:0;color:var(--muted)}
 #gbtn{min-height:44px;margin-top:8px}
@@ -233,7 +234,7 @@ textarea.qn{flex:1;min-height:110px;border:0;resize:none;background:transparent;
 <!-- Connexion -->
 <section id="login" hidden>
 <div class="box glass">
-<div class="mark"><img src="mark-dark.png" alt=""></div>
+<div class="mark"><img src="system-icon.png?v=1" alt=""></div>
 <h1>LifeCasts System</h1>
 <p>Connectez-vous avec votre compte LifeCasts.</p>
 <div id="gbtn"></div>
@@ -246,7 +247,7 @@ textarea.qn{flex:1;min-height:110px;border:0;resize:none;background:transparent;
 <!-- Système -->
 <div id="os" hidden>
 <div id="bar" class="glass">
-<button id="logoBtn" title="LifeCasts"><img src="mark-dark.png" alt="" style="height:15px;vertical-align:middle" id="barMark"></button>
+<button id="logoBtn" title="LifeCasts"><img src="system-icon-192.png?v=1" alt="" style="height:16px;width:16px;border-radius:4px;vertical-align:middle" id="barMark"></button>
 <span class="ttl" id="appTitle">LifeCasts System</span>
 <span class="sp"></span>
 <span id="barClock"></span>
@@ -278,7 +279,7 @@ const WP={sable:"linear-gradient(135deg,#f3d9b1 0%,#c98a3d 45%,#5a3a22 100%)",nu
 /* Applications du système */
 const APPS=[
  {id:"apps",nom:"Applications",icon:'<svg viewBox="0 0 100 100"><defs><linearGradient id="gS" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2AA7FF"/><stop offset="1" stop-color="#0A5FE0"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#gS)"/><g fill="#fff"><rect x="24" y="24" width="22" height="22" rx="6"/><rect x="54" y="24" width="22" height="22" rx="6" opacity=".85"/><rect x="24" y="54" width="22" height="22" rx="6" opacity=".85"/><rect x="54" y="54" width="22" height="22" rx="6" opacity=".7"/></g></svg>',url:"applications.html?v=2"},
- {id:"store",nom:"LC Store",icon:'<img src="store-icon.png?v=7" alt="">',url:"store.html"},
+ {id:"store",nom:"LifeStore",icon:'<img src="store-icon.png?v=7" alt="">',url:"store.html"},
  {id:"settings",nom:"Paramètres",icon:ICO("gear"),fn:settings},
  {id:"brochures",nom:"Brochures",icon:'<svg viewBox="0 0 100 100"><defs><linearGradient id="gB" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6C63FF"/><stop offset="1" stop-color="#3A2FC9"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#gB)"/><rect x="29" y="22" width="42" height="56" rx="7" fill="#fff"/><rect x="29" y="22" width="9" height="56" rx="4" fill="#fff" opacity=".55" transform="translate(-4 0)"/><path d="M38 22v56" stroke="#3A2FC9" stroke-width="2" opacity=".25"/></svg>',fn:brochures},
  {id:"notes",nom:"Notes",icon:'<svg viewBox="0 0 100 100"><defs><linearGradient id="gN" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE27A"/><stop offset="1" stop-color="#F7B731"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#gN)"/><rect x="22" y="18" width="56" height="66" rx="8" fill="#fff"/><path d="M31 36h38M31 48h38M31 60h26" stroke="#E0A92A" stroke-width="4" stroke-linecap="round"/><path d="M61 76l16-16 6 6-16 16-8 2z" fill="#8B5A2B"/></svg>',fn:notes},
@@ -290,7 +291,7 @@ LC_APPS.slice().reverse().forEach(r=>{if(r.id==="system")return;const ic='<img s
 const user=()=>{try{const u=JSON.parse(localStorage.getItem(KEY));return u&&u.email?u:null}catch(e){return null}};
 
 /* Thème + fond */
-function theme(){const t=S.theme||"auto",d=t==="dark"||(t==="auto"&&matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.dataset.theme=d?"dark":"light";q("barMark").style.filter=d?"invert(1)":"";document.documentElement.style.setProperty("--wp",WP[S.wp]||WP.braise)}
+function theme(){const t=S.theme||"auto",d=t==="dark"||(t==="auto"&&matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.dataset.theme=d?"dark":"light";document.documentElement.style.setProperty("--wp",WP[S.wp]||WP.braise)}
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change",theme);theme();
 
 /* Connexion */
@@ -320,6 +321,7 @@ document.addEventListener("click",e=>{const o=e.target.closest("[data-open]");if
 const wins={};
 function open(id,hash){
  const a=APPS.find(x=>x.id===id);if(!a)return;q("menu").hidden=true;
+ if(id==="store"){location.href=location.protocol==="file:"?"lifecasts://store":"store.html";return}
  if(wins[id]){if(hash){const f=document.querySelector('iframe[title="'+a.nom+'"]');if(f)f.src=a.url+hash}front(id);return}
  const w=E("div",{className:"win"});w.style.zIndex=100+Object.keys(wins).length;
  const tb=E("div",{className:"tb"});tb.innerHTML='<div class="dots"><button class="c" title="Fermer"></button><button class="m" title="Réduire"></button><button class="x" title="Agrandir"></button></div><b>'+a.nom+'</b>';
@@ -389,7 +391,7 @@ function settings(el){
  show("compte");
 }
 function brochures(el){el.innerHTML='<div style="max-width:560px;margin:20px auto;text-align:center"><div style="color:var(--accent)">'+ICO("book","64px")+'</div><h2 style="font-size:30px;letter-spacing:-.03em;margin:8px 0">Brochures LifeCasts</h2><p class="sub" style="font-size:16px">Des brochures tirées des bandes du Message de William Branham, imprimées et distribuées avec soin.</p><p style="margin-top:18px">Pour recevoir une brochure, écrivez-nous depuis la page de contact du site.</p><p style="margin-top:18px"><a class="btn" href="index.html#contact" target="_blank">Nous écrire</a></p></div>'}
-function about(el){el.innerHTML='<div style="text-align:center;padding:20px"><div class="mark" style="margin:0 auto"><img src="mark-dark.png" alt=""></div><h2 style="margin:14px 0 4px">LifeCasts System</h2><p class="sub">Version '+(window.LC_VER||"1.0")+'</p><p style="max-width:440px;margin:16px auto 0">Un espace unique pour les applications LifeCasts : Bible, Cantiques, vos réglages et votre compte.</p><p class="sub" style="margin-top:16px">© '+new Date().getFullYear()+' LifeCasts · <a href="confidentialite.html" target="_blank">Confidentialité</a> · <a href="conditions.html" target="_blank">Conditions</a></p></div>'}
+function about(el){el.innerHTML='<div style="text-align:center;padding:20px"><div class="mark" style="margin:0 auto"><img src="system-icon.png?v=1" alt=""></div><h2 style="margin:14px 0 4px">LifeCasts System</h2><p class="sub">Version '+(window.LC_VER||"1.0")+'</p><p style="max-width:440px;margin:16px auto 0">Un espace unique pour les applications LifeCasts : Bible, Cantiques, vos réglages et votre compte.</p><p class="sub" style="margin-top:16px">© '+new Date().getFullYear()+' LifeCasts · <a href="confidentialite.html" target="_blank">Confidentialité</a> · <a href="conditions.html" target="_blank">Conditions</a></p></div>'}
 /* Notes de la Bible : fusionne toutes les clés lsg.notes / lsg.notes.<compte> de cet appareil (compte actuel en priorité) */
 function bibleNotes(){const out={};let c="";try{c=localStorage.getItem("lc.current")||""}catch(e){}
  const keys=[];try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(/^lsg\.notes(\.|$)/.test(k))keys.push(k)}}catch(e){}
@@ -692,6 +694,26 @@ if(location.protocol==="file:"||new URLSearchParams(location.search).get("pair")
 boot();bnSync();
 /* Ouverture directe : system.html?app=bible */
 const want=(new URLSearchParams(location.search).get("app")||location.hash.slice(1));if(want){if(!user()&&!S.guest){S.guest=true;save();boot()}setTimeout(()=>open(want),50)}
+})();
+</script>
+<script>
+/* Pop-up « Dynamic Island » : propose de télécharger LifeCasts System (navigateur seulement), le bouton redirige vers LifeStore */
+(function(){
+ if(location.protocol==="file:"||matchMedia("(display-mode: standalone)").matches||window.self!==window.top||new URLSearchParams(location.search).get("pair"))return;
+ const st=document.createElement("style");st.textContent=`#isl{position:fixed;top:max(10px,env(safe-area-inset-top));left:50%;z-index:9999;transform:translate(-50%,-30px) scale(.8);width:132px;background:#000;color:#fff;border-radius:22px;box-shadow:0 18px 40px -12px rgba(0,0,0,.55);overflow:hidden;font-family:Inter,-apple-system,sans-serif;opacity:0;transition:width .6s cubic-bezier(.2,1.1,.3,1),border-radius .6s,opacity .35s,transform .45s cubic-bezier(.2,.9,.3,1)}
+#isl.in{opacity:1;transform:translateX(-50%)}#isl.open{width:min(392px,calc(100vw - 20px));border-radius:34px}
+#isl .hd{display:flex;align-items:center;gap:12px;padding:10px 12px}#isl.open .hd{padding:16px 16px 6px}
+#isl .hd img{width:22px;height:22px;border-radius:7px;flex:none;transition:.5s}#isl.open .hd img{width:46px;height:46px;border-radius:12px}
+#isl .t{flex:1;min-width:0;font-size:13px;font-weight:600;line-height:1.25;white-space:nowrap}#isl.open .t{font-size:16px}
+#isl .t small{display:block;font-weight:400;font-size:12.5px;color:#a1a1a6;white-space:normal;max-height:0;opacity:0;transition:.4s .1s}#isl.open .t small{max-height:40px;opacity:1;margin-top:2px}
+#isl .x2{width:30px;height:30px;border-radius:50%;border:0;background:#2c2c2e;color:#fff;display:none;place-items:center;cursor:pointer;padding:0;font-size:16px}#isl.open .x2{display:grid}
+#isl .bd{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .55s cubic-bezier(.2,1,.3,1),opacity .4s .12s}#isl.open .bd{grid-template-rows:1fr;opacity:1}
+#isl .bd>div{overflow:hidden}#isl .bi{padding:8px 16px 16px}
+#isl .go{display:flex;align-items:center;justify-content:center;height:50px;border-radius:999px;background:#fff;color:#000;font-weight:600;font-size:15px;text-decoration:none}`;document.head.append(st);
+ const el=document.createElement("div");el.id="isl";el.setAttribute("role","dialog");el.setAttribute("aria-label","Télécharger LifeCasts System");
+ el.innerHTML='<div class="hd"><img src="system-icon-192.png?v=1" alt=""><div class="t">LifeCasts System<small>Installez l\'application officielle LifeCasts</small></div><button class="x2" aria-label="Fermer">✕</button></div><div class="bd"><div><div class="bi"><a class="go" href="store.html?id=system" target="_top">Télécharger sur LifeStore</a></div></div></div>';
+ el.querySelector(".x2").onclick=()=>{el.classList.remove("open");setTimeout(()=>{el.classList.remove("in");setTimeout(()=>el.remove(),450)},350)};
+ setTimeout(()=>{document.body.append(el);requestAnimationFrame(()=>requestAnimationFrame(()=>{el.classList.add("in");setTimeout(()=>el.classList.add("open"),650)}))},1200);
 })();
 </script>
 <script>/*LC-OTA*/(function(){
